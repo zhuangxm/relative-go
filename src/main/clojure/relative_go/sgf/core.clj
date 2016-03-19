@@ -99,9 +99,9 @@
   (reduce #(go/play %1 %2 color) game moves))
 
 (defn cord->move
-  "将 bd -> [3,1]"
+  "将 bd -> [3,1] tt -> nil empty string -> nil"
   [cord]
-  (when (== (count cord) 2)
+  (when (and (== (count cord) 2) (not= "tt" cord))
     [(- (int (second cord)) (int \a))
      (- (int (first cord)) (int \a))]))
 
