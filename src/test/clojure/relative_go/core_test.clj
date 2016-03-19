@@ -16,11 +16,11 @@
       (num->letter 8) => \J)
 
 (fact "test position convert"
-      (position->move "b13") => [12, 1]
-      (position->move "J8") => [7, 8]
-      (move->position [7,8]) => "J8"
-      (move->position [12, 1]) => "B13"
-      (move->position nil) => "pass"
-      (position->move "pass") => nil)
+      (position->move 19 "b1") => [18, 1]
+      (position->move 19 "J8") => [11, 8]
+      (move->position 19 [11,8]) => "J8"
+      (move->position 19 [6, 1]) => "B13"
+      (move->position 19 nil) => "pass"
+      (position->move 19 "pass") => nil)
 
 

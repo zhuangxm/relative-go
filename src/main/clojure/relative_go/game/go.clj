@@ -6,10 +6,14 @@
 ;;  :board-size 9 :moves [[row col], [row col]]
 
 (defn new-game [board-size]
-  {:board (b/create-board board-size 0)
+  {:board (b/create-board board-size b/COLOR_EMPTY)
    :board-size board-size
    :next-player true
    :moves []})
+
+(defn board-size
+  [game]
+  (get game :board-size))
 
 (defn try-play?
   "return true success, false fail"
@@ -54,6 +58,6 @@
       (-> game
           (assoc :last-removed dead-stones)
           (assoc :board new-board)
-          (assoc :last-move move)
-          (update-in [:moves] #(conj % move))
+          (assoc :last-move [move color])
+          (update-in [:moves] #(conj % [move color]))
           (update-in [:next-player] not)))))

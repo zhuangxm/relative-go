@@ -5,7 +5,13 @@
 ;; below a example of 3x3 board
 ;; [ [0 1 2] [1 1 1] [0 0 0] ]
 
+;; move [row col] row from top to bottom start at 0
+;; col from left to right start at 0
+
 ;;position data color 0 = null 1 = black 2 white
+(def COLOR_EMPTY 0)
+(def COLOR_BLACK 1)
+(def COLOR_WHITE 2)
 
 (defn row [n initial-value]
   (vec (repeat n initial-value)))
@@ -94,7 +100,7 @@
   "return stone that was dead"
   [board move]
    (let [color (get-stone-color board move)
-         opponet-color (if (= color 1) 2 1)
+         opponet-color (if (= color COLOR_BLACK) COLOR_WHITE COLOR_BLACK)
          neighors (color-neighors board move opponet-color)
          groups (map #(connected-stone board #{} [%]) neighors)]
      (set (apply concat (filter #(= (group-liberties board %) 0) groups)))))

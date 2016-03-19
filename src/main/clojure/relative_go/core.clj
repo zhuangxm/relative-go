@@ -1,8 +1,9 @@
 (ns relative-go.core
   (:require [clojure.string :as str]
             [relative-go.ai.core :as ai]
-            [relative-go.game.board :as b]
-            [relative-go.game.go :as go]))
+            [relative-go.game.go :as go]
+            [relative-go.sgf.core :as sgf]
+            [relative-go.game.board :as b]))
 
 (defn int?
   [s]
@@ -25,20 +26,22 @@
     (char (+ n (int \A)))))
 
 (defn position->move
-  "convert string poistion lkie b13 to vector position [12,1]
+  "convert string poistion lkie b13 to vector position [6,1]
+  13 from bottom to top start at 1, change to 6 from top to bottom start at 0
    string pass to nil"
-  [str-position]
+  [board-size str-position]
   (let [position (str/upper-case str-position)]
     (when-not (= position "PASS")
       (let [[col, row] (split-at 1 position)]
-        [(dec (Integer/parseInt (apply str row)))
+        [(- board-size (Integer/parseInt (apply str row)))
          (letter->num (first col))]))))
 
 (defn move->position
-  "convert vector poistion [12, 1] to string position b13"
-  [move]
+  "convert vector poistion [12, 1] to string position b7
+  row convert from top to bottom start at 0 to from bottom to top start at 1"
+  [board-size move]
   (if move
-    (str (num->letter (second move)) (inc (first move)))
+    (str (num->letter (second move)) (- board-size (first move)))
     "pass"))
 
 (defn str->color
@@ -92,7 +95,7 @@
 (defn cmd-play
   [id & args]
   (let [color (str->color (first args))
-        move (position->move (second args))]
+        move (position->move (go/board-size @game) (second args))]
     (swap! game #(go/play % move color))
     (response id)))
 
@@ -101,7 +104,14 @@
   (let [color (str->color (first args))
         move (ai/gen-move @game color)]
     (swap! game #(go/play % move color))
-    (response id (move->position move))))
+    (response id (move->position (go/board-size @game) move))))
+
+(defn cmd-loadsgf
+  [id & args]
+  (let [filename (first args)
+        data (sgf/main-branch (sgf/parse-file filename))]
+    (reset! game (sgf/play data))
+    (response id)))
 
 (def command-fs {:name cmd-name
                  :protocol_version cmd-protocol-version
@@ -110,7 +120,9 @@
                  :boardsize cmd-board-size
                  :clear_board cmd-clear-board
                  :play cmd-play
-                 :genmove cmd-gen-move})
+                 :genmove cmd-gen-move
+                 :loadsgf cmd-loadsgf
+                 :reg_genmove cmd-gen-move})
 
 (defn -main
   [& args]
